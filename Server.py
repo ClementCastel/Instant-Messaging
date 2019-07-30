@@ -18,6 +18,7 @@ ARRET :
 
 import socket
 import threading
+from datetime import datetime
 
 class ClientThread(threading.Thread):
 
@@ -30,24 +31,21 @@ class ClientThread(threading.Thread):
 
     def run(self):
 
-        i = 0
         print("Connexion de %s %s" % (self.ip, self.port,))
-        self.clientsocket.send("Vous etes connecté au serveur !".encode())
+        self.clientsocket.send("1234azerty".encode())  # clé à générer aléatoirement
+        name = self.clientsocket.recv(9999999).decode()
         msg = ""
 
-        while "# deco" not in msg:  # Tant que pas de message de deconnexion
+        while "/exit" not in msg:  # Tant que pas de deconnexion
 
             print("Ecoute")
-            r = self.clientsocket.recv(9999999)  # On recoit un message
-            print(i)  # On affiche le nombre de fois que l'on a écouté le port
+            r = self.clientsocket.recv(9999999)
             msg = r.decode()  # Le décode
 
-            if "# deco" not in msg:  # Si le message a été envoyé par un client
-
-                print(msg)
+            if "/exit" not in msg:  # Si le message a été envoyé par un client
+                now = datetime.now()
+                print(now.strftime("%H:%M:%S")+" "+name+" # "+msg)
                 self.clientsocket.send("Message recu par le server".encode())  # On envoie un message de confirmation
-
-            i += 1
         else:
             self.clientsocket.send("Disconnected".encode())
             print("Fin")

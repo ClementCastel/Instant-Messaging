@@ -1,10 +1,4 @@
 ''' TODO :
-
-CONNECTION :
-    0 > Choisir un pseudo
-    1 > M'attribuer un pseudo
-    
-
 ENTREE - Choix dans une liste :
     0 > Voir les participants
     1 > Voir les X derniers messages (demander ensuite X)
@@ -16,23 +10,54 @@ ENTREE - Choix dans une liste :
 
 '''
 
-
+import random
 import socket
+import string
 import sys
 
+
+def choose_username():
+    print("---------------------------------")
+    print(" 0 : M'attribuer un pseudo")
+    print(" 1 : Choisir un pseudo")
+    print()
+    choice = input("Choisir un nom d'utilisateur ? ")
+
+    name = ""
+
+    if choice == "0":
+        for i in range(0, 8):
+            name += random.choice(string.ascii_letters)
+    else:
+        name = input("Pseudo ? ")
+    print("---------------------------------")
+    return name
+
+
+def listen():
+    print("Ecoute")
+
+
+'''
+
+MAIN
+
+'''
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("", 1111))
 
 print("Connecté au server !")
-valid = s.recv(9999999)
-print(valid.decode())
 
-name = input("Comment voulez-vous vous nommer ? ")
+key = s.recv(9999999)
+print("Votre cle : " + key.decode())
+
+s.send(choose_username().encode())
+
 msg = input("Message : ")
 r = ""
 while r != "Disconnected":
 
-    sendMsg = name + " # " + msg
+    sendMsg = msg
 
     s.send(sendMsg.encode())
 
