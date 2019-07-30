@@ -1,6 +1,23 @@
+''' TODO :
+
+LANCEMENT:
+    > Demander si l'on veut proteger le serveur avec un mot de passe
+
+NOUVEAU CLIENT :
+    > Créer une clé pour chiffrer les messages (utiliser Cipher.py)
+    > Lui transmettre
+    > Attribuer un ID unique que l'on affichera avec son message
+        >> [date] [nom] # [ID] : [message]
+
+ARRET :
+    > Quand il y a eu au moins 1 client de créé et que tous les clients ont été fermés
+    > threading.activeCount() retourne le nombre de Threads actifs
+
+
+'''
+
 import socket
 import threading
-
 
 class ClientThread(threading.Thread):
 
