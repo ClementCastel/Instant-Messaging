@@ -1,4 +1,4 @@
-''' TODO :
+""" TODO :
 ENTREE - Choix dans une liste :
     0 > Voir les participants
     1 > Voir les X derniers messages (demander ensuite X)
@@ -8,7 +8,7 @@ ENTREE - Choix dans une liste :
             >> Chiffrer le message avant envoie avec la clé que le serveur fournira lors de la 1ere connection
             (utiliser Cipher.py)
 
-'''
+"""
 
 import random
 import socket
