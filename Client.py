@@ -1,6 +1,6 @@
 """ TODO :
 ENTREE - Choix dans une liste :
-    0 > Voir les participants
+    0 > Voir tous les messages
     1 > Voir les X derniers messages (demander ensuite X)
             >> Le serveur conservera tous les messages dans un tableau et l'indice auquel le dernier message
             du client est
@@ -14,10 +14,11 @@ import random
 import socket
 import string
 import sys
+import pickle
 
 
 def choose_username():
-    print("---------------------------------")
+    print("-"*24)
     print(" 0 : M'attribuer un pseudo")
     print(" 1 : Choisir un pseudo")
     print()
@@ -30,12 +31,33 @@ def choose_username():
             name += random.choice(string.ascii_letters)
     else:
         name = input("Pseudo ? ")
-    print("---------------------------------")
+    print("-"*24)
     return name
 
 
-def listen():
-    print("Ecoute")
+def getMsg():
+    print("-"*24)
+    print(" 0 : Envoyer un message")
+    print(" 1 : Voir les N dernier messages")
+    print(" 2 : Voir tous les messages")
+    print(" 3 : Quitter")
+    print()
+    choice = input("Choix ? ")
+    if choice == "0":
+        message = input("Message ? ")
+        print("-"*24)
+
+        return message
+    elif choice == "1":
+        n = input("n = ")
+        print("-" * 24)
+
+        return "/msgn " + str(n)
+    elif choice == "3":
+        return "/exit"
+    else:
+        print("-" * 24)
+        return "/msgs"
 
 
 '''
@@ -53,23 +75,21 @@ print("Votre cle : " + key.decode())
 
 s.send(choose_username().encode())
 
-msg = input("Message : ")
-r = ""
-while r != "Disconnected":
+sendMsg = ""
 
-    sendMsg = msg
+while sendMsg != "/exit":
 
-    s.send(sendMsg.encode())
+    sendMsg = getMsg()
 
-    print("--- Le message a été envoyé : '" + msg + "' ---")
-    print()
+    s.send(sendMsg.encode())  # Encode le message généré
+    dataB = s.recv(999999)  # Recoit une reponse
 
-    try:
-        r = s.recv(9999999)  # On attends le message de confirmation avant de continuer
-    except ConnectionResetError:
-        sys.exit(0)
+    data = pickle.loads(dataB)
 
-    if r.decode() == "Message recu par le server":
-        msg = input("Message : ")
+    if isinstance(data, list):
+        print(*data, sep="\n")
+
     else:
-        sys.exit(0)
+        print("Message envoyé au serveur avec succès !")
+    print("-"*24)
+

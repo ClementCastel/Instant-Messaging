@@ -19,13 +19,12 @@ ARRET :
 import socket
 import threading
 from datetime import datetime
-from Cipher import Cipher # PyCharm affiche un faux positif
+import pickle
 
 global names
 
 
 class ClientThread(threading.Thread):
-    global names
 
     def __init__(self, ip, port, clientsocket):
         threading.Thread.__init__(self)
@@ -35,32 +34,47 @@ class ClientThread(threading.Thread):
         print("[+] Nouveau thread pour %s %s" % (self.ip, self.port,))
 
     def run(self):
-        global names
 
         print("Connexion de %s %s" % (self.ip, self.port,))
         self.clientsocket.send("1234azerty".encode())  # clé à générer aléatoirement
-        name = self.clientsocket.recv(9999999).decode()
-        names.append(name)
+        self.name = self.clientsocket.recv(9999999).decode()
+
         msg = ""
 
         while "/exit" not in msg:  # Tant que pas de deconnexion
 
-            print("Ecoute")
             r = self.clientsocket.recv(9999999)
             msg = r.decode()  # Le décode
+            print(msg)
 
-            if "/exit" not in msg:  # Si le message a été envoyé par un client
+            ''' Message possible :
+                - /msgs : Envoyer tous les messages : list
+                - /msgn X : Envoyer les X derniers messages : list
+                - autre : Message normal à ajouter à la liste : "code 0"
+            '''
+
+            if "/exit" in msg:
+                continue  # On va à la fin de la boucle
+
+            elif "/msgs" in msg:
+                dataB = pickle.dumps(data)  # need to convert list of tuples to bytes before sending it to Client
+
+            elif "/msgn" in msg:
+                n = int(msg.split(" ")[1])
+                dataB = pickle.dumps(data[-n:])
+
+            else:
                 now = datetime.now()
-                print(now.strftime("%H:%M:%S") + " " + name + " # " + msg)
-                print("Users : ")
-                print(names)
-                self.clientsocket.send("Message recu par le server".encode())  # On envoie un message de confirmation
+                data.append((now.strftime("%H:%M:%S"), self.name, msg))
+                dataB = pickle.dumps("code 0".encode())
+
+            self.clientsocket.send(dataB)
         else:
-            self.clientsocket.send("Disconnected".encode())
+            self.clientsocket.send(pickle.dumps("Disconnected".encode()))
             print("Fin")
 
 
-names = []
+data = []  # (date, name, msg)
 
 # Création du socket serveur
 tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
