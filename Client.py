@@ -1,15 +1,3 @@
-""" TODO :
-ENTREE - Choix dans une liste :
-    0 > Voir tous les messages
-    1 > Voir les X derniers messages (demander ensuite X)
-            >> Le serveur conservera tous les messages dans un tableau et l'indice auquel le dernier message
-            du client est
-    2 > Envoyer un message
-            >> Chiffrer le message avant envoie avec la clé que le serveur fournira lors de la 1ere connection
-            (utiliser Cipher.py)
-
-"""
-
 import random
 import socket
 import string

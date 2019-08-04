@@ -1,17 +1,14 @@
-""" TODO :
+"""
 
-LANCEMENT:
-    > Demander si l'on veut proteger le serveur avec un mot de passe
+CHIFFREMENT :
+    > Serveur :
+        >> RSA
+        >> Partage sa clé publique aux clients
+        >> Obtient les clé publiques des clients
 
-NOUVEAU CLIENT :
-    > Créer une clé pour chiffrer les messages (utiliser Cipher.py)
-    > Lui transmettre
-    > Attribuer un ID unique que l'on affichera avec son message
-        >> [date] [nom] # [ID] : [message]
+        >> Lors de l'envoie d'une donnée il chiffre avec la clé Pu du client
 
-ARRET :
-    > Quand il y a eu au moins 1 client de créé et que tous les clients ont été fermés
-    > threading.activeCount() retourne le nombre de Threads actifs
+        >> Lors de la reception de données il déchiffre avec sa clé Pr
 
 
 """
