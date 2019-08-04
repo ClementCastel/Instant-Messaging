@@ -1,9 +1,10 @@
 import random
 import socket
 import string
-import sys
 import pickle
-
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
+from Crypto import Random
 
 def choose_username():
     print("-"*24)
@@ -58,10 +59,23 @@ s.connect(("", 1111))
 
 print("Connecté au server !")
 
-key = s.recv(9999999)
-print("Votre cle : " + key.decode())
+keyServer = pickle.loads(s.recv(9999999)).decode()
+
+print("Cle publique Serveur : ")
+print(keyServer)
+cipherE = PKCS1_OAEP.new(RSA.importKey(keyServer))
+print(cipherE)
+print("--")
+
+# RSA
+randomGenerator = Random.new().read
+keys = RSA.generate(2048, randomGenerator)  # 2048 bits
+publicKey = keys.publickey().exportKey('PEM')
+
+cipherD = PKCS1_OAEP.new(keys)  # Déchiffre
 
 s.send(choose_username().encode())
+s.send(pickle.dumps(publicKey))  # Clé publique client
 
 sendMsg = ""
 
@@ -69,10 +83,16 @@ while sendMsg != "/exit":
 
     sendMsg = getMsg()
 
-    s.send(sendMsg.encode())  # Encode le message généré
+    print("Message envoyé : ")
+    print(cipherE.encrypt(sendMsg.encode()))
+    s.send(cipherE.encrypt(sendMsg.encode()))  # Encode le message généré
     dataB = s.recv(999999)  # Recoit une reponse
 
-    data = pickle.loads(dataB)
+    print("Recu")
+    print(dataB)
+    print("--")
+
+    data = pickle.loads(cipherD.decrypt(dataB))
 
     if isinstance(data, list):
         print(*data, sep="\n")

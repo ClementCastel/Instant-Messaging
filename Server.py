@@ -17,6 +17,10 @@ import socket
 import threading
 from datetime import datetime
 import pickle
+import Crypto
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from Crypto.Cipher import PKCS1_OAEP
 
 global names
 
@@ -33,15 +37,21 @@ class ClientThread(threading.Thread):
     def run(self):
 
         print("Connexion de %s %s" % (self.ip, self.port,))
-        self.clientsocket.send("1234azerty".encode())  # clé à générer aléatoirement
+        self.clientsocket.send(pickle.dumps(publicKey))  # clé publique du serveur
         self.name = self.clientsocket.recv(9999999).decode()
+        keyClient = pickle.loads(self.clientsocket.recv(9999999)).decode()
+        print("Clé C :")
+        print(keyClient)
+        print("--")
+        cipherE = PKCS1_OAEP.new(RSA.importKey(keyClient))  # Chiffre
+        print("CipherE of C ok")
 
         msg = ""
 
         while "/exit" not in msg:  # Tant que pas de deconnexion
 
             r = self.clientsocket.recv(9999999)
-            msg = r.decode()  # Le décode
+            msg = cipherD.decrypt(r).decode()  # Le décode
             print(msg)
 
             ''' Message possible :
@@ -54,7 +64,7 @@ class ClientThread(threading.Thread):
                 continue  # On va à la fin de la boucle
 
             elif "/msgs" in msg:
-                dataB = pickle.dumps(data)  # need to convert list of tuples to bytes before sending it to Client
+                dataB = pickle.dumps(data)  # List(tuples) to bytes before sending it to C
 
             elif "/msgn" in msg:
                 n = int(msg.split(" ")[1])
@@ -65,13 +75,20 @@ class ClientThread(threading.Thread):
                 data.append((now.strftime("%H:%M:%S"), self.name, msg))
                 dataB = pickle.dumps("code 0".encode())
 
-            self.clientsocket.send(dataB)
+            self.clientsocket.send(cipherE.encrypt(dataB))
         else:
             self.clientsocket.send(pickle.dumps("Disconnected".encode()))
             print("Fin")
 
 
 data = []  # (date, name, msg)
+
+# RSA
+randomGenerator = Random.new().read
+keys = RSA.generate(2048, randomGenerator)  # 2048 bits
+publicKey = keys.publickey().exportKey('PEM')
+
+cipherD = PKCS1_OAEP.new(keys)  # Déchiffre
 
 # Création du socket serveur
 tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
