@@ -1,18 +1,3 @@
-"""
-
-CHIFFREMENT :
-    > Serveur :
-        >> RSA
-        >> Partage sa clé publique aux clients
-        >> Obtient les clé publiques des clients
-
-        >> Lors de l'envoie d'une donnée il chiffre avec la clé Pu du client
-
-        >> Lors de la reception de données il déchiffre avec sa clé Pr
-
-
-"""
-
 import socket
 import threading
 from datetime import datetime
